@@ -2,6 +2,7 @@ package de.aoc.day4
 
 import de.aoc.day5.calculate
 import de.aoc.day5.day5_a
+import de.aoc.day5.day5_b
 import org.junit.Test
 import org.junit.jupiter.api.Assertions.assertEquals
 import kotlin.test.assertFalse
@@ -39,6 +40,14 @@ class Day5Test {
 
         val result = calculate(input)
         assertEquals(result, 820)
+    }
+
+    @Test
+    fun day5_b() {
+        val input = Day5Test::class.java.getResource("/day5_input").readText()
+
+        val result = day5_b(input)
+        assertEquals(result, 579)
     }
 
 }

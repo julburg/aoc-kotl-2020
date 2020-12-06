@@ -2,8 +2,16 @@ package de.aoc.day5
 
 
 fun day5_a(inputAsString: String): Int {
-    return inputAsString.split("\n").map { calculate(it) }.maxOrNull ()!!
+    return getSeatList(inputAsString).maxOrNull()!!
 }
+
+fun day5_b(inputAsString: String): Int {
+    val seatList = getSeatList(inputAsString).sorted()
+    return listOf(seatList.first()..seatList.last()).flatten().first { !seatList.contains(it) }
+}
+
+
+private fun getSeatList(inputAsString: String) = inputAsString.split("\n").map { calculate(it) }
 
 fun calculate(boardingPass: String): Int {
     val split = boardingPass.split("").filter { it!="" }
