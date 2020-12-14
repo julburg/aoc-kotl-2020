@@ -34,6 +34,57 @@ class Day11Test {
     }
 
     @Test
+    fun day11_b() {
+        val input = Day11Test::class.java.getResource("/day11_input").readText()
+
+        val result = day11_b(input)
+        assertEquals(2324, result)
+    }
+
+    @Test
+    fun day11_b_example_1() {
+        val input = "L.LL.LL.LL\n" +
+                "LLLLLLL.LL\n" +
+                "L.L.L..L..\n" +
+                "LLLL.LL.LL\n" +
+                "L.LL.LL.LL\n" +
+                "L.LLLLL.LL\n" +
+                "..L.L.....\n" +
+                "LLLLLLLLLL\n" +
+                "L.LLLLLL.L\n" +
+                "L.LLLLL.LL"
+
+        val result = day11_b(input)
+        assertEquals(26, result)
+    }
+
+
+    @Test
+    fun getVisibleSeats() {
+        val input = ".......#.\n" +
+                "...#.....\n" +
+                ".#.......\n" +
+                ".........\n" +
+                "..#L....#\n" +
+                "....#....\n" +
+                ".........\n" +
+                "#........\n" +
+                "...#....."
+
+        val plane = parseSeatMap(input);
+        val visibleSeats = plane.getVisibleSeats(SeatNumber(4, 3))
+        assertTrue(visibleSeats.contains(SeatNumber(1, 3)))
+        assertTrue(visibleSeats.contains(SeatNumber(0, 7)))
+        assertTrue(visibleSeats.contains(SeatNumber(4, 8)))
+        assertTrue(visibleSeats.contains(SeatNumber(5, 4)))
+        assertTrue(visibleSeats.contains(SeatNumber(8, 3)))
+        assertTrue(visibleSeats.contains(SeatNumber(4, 2)))
+        assertTrue(visibleSeats.contains(SeatNumber(7, 0)))
+        assertTrue(visibleSeats.contains(SeatNumber(2, 1)))
+        assertEquals(visibleSeats.size, 8)
+    }
+
+    @Test
     internal fun parsePlaneMap() {
         val plane = parseSeatMap("L.#\n" +
                 "LL.\n")
@@ -71,32 +122,4 @@ class Day11Test {
         assertFalse(plane.isSeatOccupied(SeatNumber(2, 2)))
     }
 
-
-    @Test
-    internal fun nextSeatState_allSeatsAvailable() {
-        val input = "L.LL.LL.LL\n" +
-                "LLLLLLL.LL\n" +
-                "L.L.L..L..";
-        val plane = parseSeatMap(input)
-
-        assertTrue(plane.nextSeatState(SeatNumber(0, 0)))
-        assertTrue(plane.nextSeatState(SeatNumber(0, 2)))
-        assertTrue(plane.nextSeatState(SeatNumber(1, 3)))
-    }
-
-    @Test
-    internal fun nextSeatState() {
-        val input = "#.LL.L#.##\n" +
-                "#LLLLLL.L#\n" +
-                "L.L.L..L..";
-        val plane = parseSeatMap(input)
-
-        assertTrue(plane.nextSeatState(SeatNumber(1, 0)))
-        assertFalse(plane.nextSeatState(SeatNumber(1, 1)))
-        assertTrue(plane.nextSeatState(SeatNumber(1, 2)))
-        assertTrue(plane.nextSeatState(SeatNumber(1, 3)))
-        assertTrue(plane.nextSeatState(SeatNumber(1, 4)))
-        assertFalse(plane.nextSeatState(SeatNumber(1, 5)))
-        assertFalse(plane.nextSeatState(SeatNumber(1, 6)))
-    }
 }

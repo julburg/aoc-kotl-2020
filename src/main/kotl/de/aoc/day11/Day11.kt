@@ -7,7 +7,8 @@ fun day11_a(inputAsString: String): Int {
     while (true) {
         val newPlane = Plane(HashMap(plane.seats))
         for (seat in plane.seats.keys) {
-            newPlane.seats[seat] = plane.nextSeatState(seat)
+            val adjacentSeatNumbers = plane.getAdjacentSeatNumbers(seat)
+            newPlane.seats[seat] = plane.nextSeatState(seat, adjacentSeatNumbers, 4)
         }
         if (newPlane == plane) {
             break;
@@ -18,6 +19,45 @@ fun day11_a(inputAsString: String): Int {
     return plane.seats.filter { plane.isSeatOccupied(it.key) }.size
 }
 
+
+fun day11_b(inputAsString: String): Int {
+
+    var plane = parseSeatMap(inputAsString)
+    while (true) {
+        printSeats(plane)
+        println()
+        val newPlane = Plane(HashMap(plane.seats))
+        for (seat in plane.seats.keys) {
+            val visibleSeatNumbers = plane.getVisibleSeats(seat)
+            newPlane.seats[seat] = plane.nextSeatState(seat, visibleSeatNumbers, 5)
+        }
+        if (newPlane == plane) {
+            break;
+        }
+        plane = newPlane
+    }
+
+    return plane.seats.filter { plane.isSeatOccupied(it.key) }.size
+}
+
+fun printSeats(plane: Plane) {
+    val maxRow = plane.seats.keys.map { it.row }.maxByOrNull { it }!!
+    val maxColumn = plane.seats.keys.map { it.column }.maxByOrNull { it }!!
+
+    for (row in 0..maxRow) {
+        for (column in 0..maxColumn) {
+            if (plane.seats.containsKey(SeatNumber(row, column))) {
+                if (plane.seats.getValue(SeatNumber(row, column))) {
+                    print("#")
+                } else {
+                    print("L")
+                }
+            }
+            print(".")
+        }
+        println()
+    }
+}
 
 fun parseSeatMap(inputAsString: String): Plane {
     val seats = hashMapOf<SeatNumber, Boolean>()
@@ -60,6 +100,67 @@ data class Plane(val seats: HashMap<SeatNumber, Boolean>) {
         return seats.getValue(seat)
     }
 
+    fun getVisibleSeats(seat: SeatNumber): List<SeatNumber> {
+        val visibleSeatNumbers = ArrayList<SeatNumber>()
+
+        //Seats above
+        addSeatMaxRow(visibleSeatNumbers, seat, 0.0)
+        addSeatMaxRow(visibleSeatNumbers, seat, 45.0)
+        addSeatMaxRow(visibleSeatNumbers, seat, 315.0)
+
+        //Seats below
+        addSeatMinRow(visibleSeatNumbers, seat, 180.0)
+        addSeatMinRow(visibleSeatNumbers, seat, 225.0)
+        addSeatMinRow(visibleSeatNumbers, seat, 135.0)
+
+        addSeatMaxColumn(visibleSeatNumbers, seat, 270.0)
+        addSeatMinColumn(visibleSeatNumbers, seat, 90.0)
+
+        return visibleSeatNumbers
+    }
+
+    private fun addSeatMaxColumn(visibleSeatNumbers: ArrayList<SeatNumber>, seat: SeatNumber, degree: Double) {
+        val seat0Degrees = seats.keys.filter { it != seat && calcRotationAngleInDegrees(seat, it) == degree }.maxByOrNull { it.column }
+        if (seat0Degrees != null) {
+            visibleSeatNumbers.add(seat0Degrees)
+        }
+    }
+
+    private fun addSeatMinColumn(visibleSeatNumbers: ArrayList<SeatNumber>, seat: SeatNumber, degree: Double) {
+        val seat0Degrees = seats.keys.filter { it != seat && calcRotationAngleInDegrees(seat, it) == degree }.minByOrNull { it.column }
+        if (seat0Degrees != null) {
+            visibleSeatNumbers.add(seat0Degrees)
+        }
+    }
+
+
+    private fun addSeatMaxRow(visibleSeatNumbers: ArrayList<SeatNumber>, seat: SeatNumber, degree: Double) {
+        val seat0Degrees = seats.keys.filter { it != seat && calcRotationAngleInDegrees(seat, it) == degree }.maxByOrNull { it.row }
+        if (seat0Degrees != null) {
+            visibleSeatNumbers.add(seat0Degrees)
+        }
+    }
+
+    private fun addSeatMinRow(visibleSeatNumbers: ArrayList<SeatNumber>, seat: SeatNumber, degree: Double) {
+        val seat0Degrees = seats.keys.filter { it != seat && calcRotationAngleInDegrees(seat, it) == degree }.minByOrNull { it.row }
+        if (seat0Degrees != null) {
+            visibleSeatNumbers.add(seat0Degrees)
+        }
+    }
+
+
+    //copied from stackoverflow
+    fun calcRotationAngleInDegrees(centerSeat: SeatNumber, targetSeat: SeatNumber): Double {
+        var theta = Math.atan2((targetSeat.row - centerSeat.row).toDouble(), (targetSeat.column - centerSeat.column).toDouble())
+        theta += Math.PI / 2.0
+        var angle = Math.toDegrees(theta)
+        if (angle < 0) {
+            angle += 360.0
+        }
+
+        return angle
+    }
+
     fun isSeatOccupied(seatNumber: SeatNumber): Boolean {
         if (seats.containsKey(seatNumber)) {
             return seats.get(seatNumber)!!
@@ -67,11 +168,10 @@ data class Plane(val seats: HashMap<SeatNumber, Boolean>) {
         return false
     }
 
-    fun nextSeatState(seat: SeatNumber): Boolean {
-        val adjacentSeatNumbers = getAdjacentSeatNumbers(seat)
+    fun nextSeatState(seat: SeatNumber, adjacentSeatNumbers: List<SeatNumber>, seatCount: Int): Boolean {
         val occupiedAdjacentSeats = adjacentSeatNumbers.filter { isSeatOccupied(it) }
 
-        if (seatIsOccupied(seat) && occupiedAdjacentSeats.size >= 4) {
+        if (seatIsOccupied(seat) && occupiedAdjacentSeats.size >= seatCount) {
             return false
         }
 
